@@ -1,13 +1,9 @@
 #!/usr/bin/python
-
+#hzjiangcong
 import requests
 import  json
 import csv
 from collections import namedtuple
-
-
-
-
 
 def main():
     bookUnitsOriginal = readCSV('data.csv')
