@@ -9,9 +9,11 @@ def main():
     bookUnitsOriginal = readCSV('bookOriginal的副本.csv')
     bookUnitsResult = []
 
+    i = 1
     for bookUnitTemp in bookUnitsOriginal:
-        bookUnitRs = getVipBookArticle(bookUnitTemp).vipArticleUuidfromNet
 
+        bookUnitRs = getVipBookArticle(bookUnitTemp, i).vipArticleUuidfromNet
+        print(i)
         if bookUnitRs.vipArticleUuidfromNet != bookUnitRs.vipArticleUuidfromCSV:
             bookUnitRs.flag = False
             bookUnitsResult.append(bookUnitRs)
@@ -42,7 +44,7 @@ def writeCSV(filename, bookUnitsResult):
         f_csv.writeheader()
         f_csv.writerows(rows)
 
-def getVipBookArticle(bookUnitTemp):
+def getVipBookArticle(bookUnitTemp,i):
     url = "https://pre.kuxuanbook.com/book/catalog.json"
     palload = {"sourceUuid": bookUnitTemp.sourceUuid,
                "pageNow": "1", "reverse": "false", "pageSize": "100"}
@@ -66,7 +68,7 @@ def getVipBookArticle(bookUnitTemp):
             bookUnitRS = bookUnit(sourceUuid, bookUnitTemp.vipArticleUuidfromCSV)
             bookUnitRS.vipArticleUuidfromNet = vipArticleUuid
             return  vipArticleUuid
-
+    print(i)
 
 def readCSV(file):
     bookUnits = []

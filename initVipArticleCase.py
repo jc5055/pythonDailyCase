@@ -6,7 +6,7 @@ import csv
 from collections import namedtuple
 
 def getVipBookArticle(bookUnitOriginal):
-    url = "https://pre.kuxuanbook.com/book/catalog.json"
+    url = "https://xkcszh.kuxuanbook.com/book/catalog.json"
     palload = {"sourceUuid": bookUnitOriginal.sourceUuid,
                "pageNow": "1", "reverse": "false", "pageSize": "100"}
     headers = {
