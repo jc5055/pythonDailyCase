@@ -162,31 +162,31 @@ def main():
 
     bookUnitListYesterday = readBookUnitFromCSV(filePath)
 
-    # difBookUnitList = []
-    # bookUnitListToday = []
-    # i = 1
-    #
-    # for bookTemp in bookUnitListYesterday:
-    #     sourceUuidTemp = bookTemp.sourceUuid
-    #     print(i)
-    #     i = i + 1
-    #     try:
-    #         vipArtileInfo = getArticleUuidfromNet(sourceUuidTemp, i)
-    #         vipArticleSourceUuid = vipArtileInfo[0]
-    #         vipArticleTitle = vipArtileInfo[1]
-    #         bookUnitTemp = BookUnit(sourceUuidTemp, vipArticleSourceUuid, vipArticleTitle)
-    #         bookUnitListToday.append(bookUnitTemp)
-    #
-    #     except:
-    #         print(sourceUuidTemp)
-    #         bookUnitTemp = BookUnit(sourceUuidTemp, '-1', 'request error')
-    #         bookUnitListToday.append(bookUnitTemp)
-    #
-    # writeBookUnitToCSV(dataTodayFilePath, bookUnitListToday)
-    #
-    # difBookUnitList = compareBookData(bookUnitListYesterday, bookUnitListToday)
-    #
-    # writeBookUnitDifToCSV(bookVipDifFilePath, difBookUnitList)
+    difBookUnitList = []
+    bookUnitListToday = []
+    i = 1
+
+    for bookTemp in bookUnitListYesterday:
+        sourceUuidTemp = bookTemp.sourceUuid
+        print(i)
+        i = i + 1
+        try:
+            vipArtileInfo = getArticleUuidfromNet(sourceUuidTemp, i)
+            vipArticleSourceUuid = vipArtileInfo[0]
+            vipArticleTitle = vipArtileInfo[1]
+            bookUnitTemp = BookUnit(sourceUuidTemp, vipArticleSourceUuid, vipArticleTitle)
+            bookUnitListToday.append(bookUnitTemp)
+
+        except:
+            print(sourceUuidTemp)
+            bookUnitTemp = BookUnit(sourceUuidTemp, '-1', 'request error')
+            bookUnitListToday.append(bookUnitTemp)
+
+    writeBookUnitToCSV(dataTodayFilePath, bookUnitListToday)
+
+    difBookUnitList = compareBookData(bookUnitListYesterday, bookUnitListToday)
+
+    writeBookUnitDifToCSV(bookVipDifFilePath, difBookUnitList)
 
 if __name__ == '__main__':
     main()
