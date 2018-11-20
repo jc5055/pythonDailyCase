@@ -158,7 +158,7 @@ def main():
 
     filePath = 'bookData' + yesterdayStr + '.csv'
     dataTodayFilePath = "bookData" + todayStr + ".csv"
-    bookVipDifFilePath = "bookVipDif" + todayStr + ".csv"
+    bookVipDifFilePath = "bookVipDif.csv"
 
     bookUnitListYesterday = readBookUnitFromCSV(filePath)
 
