@@ -8,22 +8,22 @@ import  time
 import codecs
 
 def readCsv2BookSourceUuidList(file):
-    sourceUuidList = []
+    bookUnitList = []
     with open(file, 'r') as f:
         f_csv= csv.reader(f)
         headings = next(f_csv)
         Row = namedtuple('Row', headings)
         for row in f_csv:
             r = Row(*row)
-            print(r.sourceUuid)
-            sourceUuidList.append(r.sourceUuid)
-    return sourceUuidList
+            bookUnitTemp = BookUnit(r.bookName, r.sourceUuid)
+            bookUnitList.append(bookUnitTemp)
+    return bookUnitList
 
 
 def writeCsv2BookUnitList(filePath, bookUnitList, headers):
     rows = []
     for temp in bookUnitList:
-        row = {'sourceUuid': temp.sourceUuid, 'vipArticleUuid': temp.vipArticleUuid, 'vipArticleTitle': temp.vipArticleTitle}
+        row = {'sourceUuid': temp.sourceUuid, 'bookName': temp.bookName, 'vipArticleUuid': temp.vipArticleUuid, 'vipArticleTitle': temp.vipArticleTitle}
         rows.append(row)
 
     with open(filePath, 'w') as f:
@@ -34,10 +34,11 @@ def writeCsv2BookUnitList(filePath, bookUnitList, headers):
 
 
 class BookUnit:
-    def __init__(self, sourceUuid, vipArticleUuid,vipArticleTitle):
+    def __init__(self, bookName, sourceUuid):
+        self.bookName = bookName
         self.sourceUuid = sourceUuid
-        self.vipArticleUuid = vipArticleUuid
-        self.vipArticleTitle = vipArticleTitle
+        self.vipArticleUuid = ""
+        self.vipArticleTitle = ""
 
 
 def getArticleUuidfromNet(bookSourceUuid, i):
@@ -79,28 +80,32 @@ def main():
     filePathOringial = "bookOriginal.csv"
     timeTemp = time.strftime("%Y%m%d", time.localtime())
     filePathRs = 'bookData' + timeTemp + '.csv'
+
     bookUnitList = []
 
-    bookSourceUuid = readCsv2BookSourceUuidList(filePathOringial)
-
     i = 1
-    for sourceUuidTemp in bookSourceUuid:
+    for bookTemp in readCsv2BookSourceUuidList(filePathOringial):
         print(i)
         i = i + 1
         try:
-            vipArtileInfo = getArticleUuidfromNet(sourceUuidTemp, i)
-            vipArticleSourceUuid = vipArtileInfo[0]
+            vipArtileInfo = getArticleUuidfromNet(bookTemp.sourceUuid, i)
+            vipArticleUuid = vipArtileInfo[0]
             vipArticleTitle = vipArtileInfo[1]
-            bookUnitTemp = BookUnit(sourceUuidTemp, vipArticleSourceUuid, vipArticleTitle)
-            bookUnitList.append(bookUnitTemp)
+
+            bookTemp.vipArticleUuid = vipArticleUuid
+            bookTemp.vipArticleTitle = vipArticleTitle
+            # bookUnitTemp = BookUnit(sourceUuidTemp, vipArticleSourceUuid, vipArticleTitle)
+            bookUnitList.append(bookTemp)
 
         except :
-            print(sourceUuidTemp)
-            bookUnitTemp = BookUnit(sourceUuidTemp, '-1', 'request error')
-            bookUnitList.append(bookUnitTemp)
+            print(bookTemp.sourceUuid)
+            bookTemp.vipArticleUuid = '-1'
+            bookTemp.vipArticleTitle = 'request error'
+            # bookUnitTemp = BookUnit(sourceUuidTemp, '-1', )
+            bookUnitList.append(bookTemp)
 
 
-    headers = ['sourceUuid', 'vipArticleUuid', 'vipArticleTitle']
+    headers = ['sourceUuid','bookName', 'vipArticleUuid', 'vipArticleTitle']
     writeCsv2BookUnitList(filePathRs, bookUnitList, headers)
 
     return

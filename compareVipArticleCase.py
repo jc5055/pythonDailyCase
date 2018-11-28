@@ -17,20 +17,24 @@ def readBookUnitFromCSV(filePath):
         for row in f_csv:
             r = Row(*row)
             sourceUuid = r.sourceUuid
+            bookName = r.bookName
             vipArticleUuid = r.vipArticleUuid
             vipArticleTitle = r.vipArticleTitle
-            bookUnitTemp = BookUnit(sourceUuid, vipArticleUuid, vipArticleTitle)
+            bookUnitTemp = BookUnit(sourceUuid, bookName)
+            bookUnitTemp.vipArticleUuid = vipArticleUuid
+            bookUnitTemp.vipArticleTitle = vipArticleTitle
             bookUnitList.append(bookUnitTemp)
     return bookUnitList
 
 
 
 def writeBookUnitToCSV(filePath, bookUnitList):
-    headers = ['sourceUuid', 'vipArticleUuid', 'vipArticleTitle']
+    headers = ['sourceUuid','bookName', 'vipArticleUuid', 'vipArticleTitle']
     rows = []
     for temp in bookUnitList:
         rowTemp = {
             'sourceUuid':temp.sourceUuid,
+            'bookName': temp.bookName,
             'vipArticleUuid':temp.vipArticleUuid,
             'vipArticleTitle':temp.vipArticleTitle,
         }
@@ -42,11 +46,12 @@ def writeBookUnitToCSV(filePath, bookUnitList):
 
 
 def writeBookUnitDifToCSV(filePath, bookUnitCompareList):
-    headers = ['sourceUuid', 'vipArticleUuidYesterday', 'vipArticleTitleYesterday','vipArticleUuidToday', 'vipArticleTitleToday']
+    headers = ['sourceUuid','bookName','vipArticleUuidYesterday', 'vipArticleTitleYesterday','vipArticleUuidToday', 'vipArticleTitleToday']
     rows = []
     for temp in bookUnitCompareList:
         rowTemp = {
             'sourceUuid':temp.sourceUuid,
+            'bookName': temp.bookName,
             'vipArticleUuidYesterday':temp.vipArticleUuidYesterday,
             'vipArticleTitleYesterday':temp.vipArticleTitleYesterday,
             'vipArticleUuidToday':temp.vipArticleUuidToday,
@@ -102,14 +107,16 @@ def getArticleUuidfromNet(bookSourceUuid, i):
 
 
 class BookUnit:
-    def __init__(self, sourceUuid, vipArticleUuid,vipArticleTitle):
+    def __init__(self, sourceUuid, bookName):
         self.sourceUuid = sourceUuid
-        self.vipArticleUuid = vipArticleUuid
-        self.vipArticleTitle = vipArticleTitle
+        self.bookName = bookName
+        self.vipArticleTitle = ""
+        self.vipArticleUuid = ""
 
 class BookUnitCompare:
-    def __init__(self, sourceUuid, vipArticleUuidYesterday,vipArticleTitleYesterday, vipArticleUuidToday, vipArticleTitleToday):
+    def __init__(self, sourceUuid, bookName, vipArticleUuidYesterday,vipArticleTitleYesterday, vipArticleUuidToday, vipArticleTitleToday):
         self.sourceUuid = sourceUuid
+        self.bookName = bookName
         self.vipArticleUuidYesterday = vipArticleUuidYesterday
         self.vipArticleTitleYesterday = vipArticleTitleYesterday
         self.vipArticleUuidToday = vipArticleUuidToday
@@ -130,22 +137,11 @@ def compareBookData(bookUnitList1, bookUnitList2):
     for i in range(0, bookUnitList1.__len__()):
         vipArticleUuid1 = bookUnitList1[i].vipArticleUuid
         vipArticleUuid2 = bookUnitList2[i].vipArticleUuid
-
-        if strIsNegative(vipArticleUuid1) or strIsNegative(vipArticleUuid2) or vipArticleUuid1 != vipArticleUuid2:
-            difBookUnit = BookUnitCompare(bookUnitList1[i].sourceUuid, vipArticleUuid1, bookUnitList1[i].vipArticleTitle,
+        if vipArticleUuid1 != vipArticleUuid2:
+        # if strIsNegative(vipArticleUuid1) or strIsNegative(vipArticleUuid2) or vipArticleUuid1 != vipArticleUuid2:
+            difBookUnit = BookUnitCompare(bookUnitList1[i].sourceUuid, bookUnitList1[i].bookName, vipArticleUuid1, bookUnitList1[i].vipArticleTitle,
                                           vipArticleUuid2, bookUnitList2[i].vipArticleTitle)
             difBookUnitList.append(difBookUnit)
-
-
-    # for bookUnit1, bookUnit2 in bookUnitList1, bookUnitList2:
-    #     vipArticleUuid1 = bookUnit1.vipArticleUuid
-    #     vipArticleUuid2 = bookUnit2.vipArticleUuid
-    #
-    #
-    #     if strIsNegative(vipArticleUuid1) or strIsNegative(vipArticleUuid2) or vipArticleUuid1 != vipArticleUuid2 :
-    #         difBookUnit = BookUnitCompare(bookUnit1.sourceUuid, vipArticleUuid1,bookUnit1.vipArticleTitle,
-    #                                   vipArticleUuid2, bookUnit2.vipArticleTitle)
-    #         difBookUnitList.append(difBookUnit)
 
     return  difBookUnitList
 
@@ -156,11 +152,12 @@ def main():
     yesterday = today - datetime.timedelta(days=1)
     yesterdayStr = yesterday.strftime('%Y%m%d')
 
-    filePath = 'bookData' + yesterdayStr + '.csv'
+    yesterdayFilePath = 'bookData' + yesterdayStr + '.csv'
     dataTodayFilePath = "bookData" + todayStr + ".csv"
+    dataTodayDifFilePath = "bookDataDif" + todayStr + ".csv"
     bookVipDifFilePath = "bookVipDif.csv"
 
-    bookUnitListYesterday = readBookUnitFromCSV(filePath)
+    bookUnitListYesterday = readBookUnitFromCSV(yesterdayFilePath)
 
     difBookUnitList = []
     bookUnitListToday = []
@@ -170,16 +167,21 @@ def main():
         sourceUuidTemp = bookTemp.sourceUuid
         print(i)
         i = i + 1
+        bookUnitTemp = BookUnit(sourceUuidTemp, bookTemp.bookName)
         try:
             vipArtileInfo = getArticleUuidfromNet(sourceUuidTemp, i)
             vipArticleSourceUuid = vipArtileInfo[0]
             vipArticleTitle = vipArtileInfo[1]
-            bookUnitTemp = BookUnit(sourceUuidTemp, vipArticleSourceUuid, vipArticleTitle)
+            bookUnitTemp.vipArticleTitle = vipArticleTitle
+            bookUnitTemp.vipArticleUuid = vipArticleSourceUuid
+
             bookUnitListToday.append(bookUnitTemp)
 
         except:
             print(sourceUuidTemp)
-            bookUnitTemp = BookUnit(sourceUuidTemp, '-1', 'request error')
+
+            bookUnitTemp.vipArticleTitle = 'request error'
+            bookUnitTemp.vipArticleUuid = '-1'
             bookUnitListToday.append(bookUnitTemp)
 
     writeBookUnitToCSV(dataTodayFilePath, bookUnitListToday)
@@ -187,6 +189,7 @@ def main():
     difBookUnitList = compareBookData(bookUnitListYesterday, bookUnitListToday)
 
     writeBookUnitDifToCSV(bookVipDifFilePath, difBookUnitList)
+    writeBookUnitDifToCSV(dataTodayDifFilePath, difBookUnitList)
 
 if __name__ == '__main__':
     main()
